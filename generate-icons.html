@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Training 4M — Icon Generator</title>
+<style>
+:root{
+  --bg:#09092d;--surface:#1a1a5e;--accent:#4b4bf9;
+  --text:#fff;--text2:rgba(255,255,255,.7);--border:rgba(75,75,249,.3);
+  --mint:#8bf0bb;--lemon:#f9ef77;--coral:#ff8d96;--lav:#bfa1ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  min-height:100vh;padding:24px;
+  -webkit-font-smoothing:antialiased;
+}
+h1{font-size:24px;font-weight:800;margin-bottom:4px;
+  background:linear-gradient(135deg,var(--accent),var(--lav));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:28px}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.card h3{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px}
+canvas{border-radius:16px;border:1px solid var(--border)}
+.btn{
+  padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;
+  background:linear-gradient(135deg,var(--accent),#6b6bff);color:#fff;
+  transition:all .2s;box-shadow:0 4px 12px rgba(75,75,249,.3);width:100%;
+}
+.btn:hover{box-shadow:0 6px 20px rgba(75,75,249,.4)}
+.btn:active{transform:scale(.95)}
+.btn-all{
+  padding:16px 32px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;border:none;
+  background:linear-gradient(135deg,var(--mint),var(--accent));color:#09092d;
+  transition:all .2s;box-shadow:0 4px 20px rgba(139,240,187,.3);
+  display:block;margin:0 auto 28px;
+}
+.btn-all:active{transform:scale(.95)}
+.info{
+  background:rgba(75,75,249,.1);border:1px solid var(--border);border-radius:12px;
+  padding:16px;margin-bottom:24px;font-size:13px;color:var(--text2);line-height:1.6;
+}
+.info b{color:var(--accent)}
+.status{
+  background:rgba(139,240,187,.1);border:1px solid rgba(139,240,187,.3);
+  border-radius:8px;padding:12px 16px;font-size:13px;color:var(--mint);
+  margin-bottom:16px;display:none;
+}
+.status.show{display:block}
+.screenshot-section{margin-top:32px}
+.screenshot-section h2{font-size:18px;font-weight:700;margin-bottom:16px}
+/* Powered by EverGPT */
+.powered{
+  text-align:center;font-size:11px;color:rgba(255,255,255,.2);
+  margin-top:32px;letter-spacing:.5px;
+}
+</style>
+</head>
+<body>
+
+<h1>🎨 Training 4M — Icon Generator</h1>
+<p class="sub">Génère tous les fichiers PNG requis pour la PWA en un clic</p>
+
+<div class="info">
+  <b>Fichiers générés :</b><br>
+  • <b>icon-192.png</b> — App icon standard (192×192)<br>
+  • <b>icon-512.png</b> — App icon haute résolution (512×512)<br>
+  • <b>icon-192-maskable.png</b> — Icône adaptive Android (192×192)<br>
+  • <b>icon-512-maskable.png</b> — Icône adaptive HD (512×512)<br>
+  • <b>apple-touch-icon.png</b> — Icône iOS homescreen (180×180)<br>
+  • <b>favicon.ico equiv</b> — Favicon 32×32<br>
+  • <b>screenshot-home.png</b> — Screenshot manifest (390×844)<br>
+  • <b>og-image.png</b> — Open Graph social preview (1200×630)
+</div>
+
+<div class="status" id="status">✅ Icônes générées ! Télécharge chaque fichier et place-le dans ton dossier /Programme/</div>
+
+<button class="btn-all" onclick="generateAll()">⚡ Générer et télécharger TOUT</button>
+
+<div class="grid" id="icon-grid"></div>
+
+<div class="screenshot-section">
+  <h2>📸 Screenshots & Social</h2>
+  <div class="grid" id="screenshot-grid"></div>
+</div>
+
+<p class="powered">Powered by EverGPT</p>
+
+<script>
+/* ================================================================
+   ICON DRAWING ENGINE
+   ================================================================ */
+
+const FD = {
+  midnight: '#09092d',
+  indigo:   '#4b4bf9',
+  white:    '#ffffff',
+  mint:     '#8bf0bb',
+  lemon:    '#f9ef77',
+  coral:    '#ff8d96',
+  lavender: '#bfa1ff',
+};
+
+/**
+ * Draw the Training 4M icon on a canvas
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} size - canvas size
+ * @param {boolean} maskable - full bleed (no rounded bg)
+ */
+function drawIcon(ctx, size, maskable = false) {
+  const S = size;
+  const scale = S / 512;
+
+  ctx.clearRect(0, 0, S, S);
+
+  // === BACKGROUND ===
+  if (!maskable) {
+    const radius = S * 0.22;
+    ctx.beginPath();
+    ctx.moveTo(radius, 0);
+    ctx.lineTo(S - radius, 0);
+    ctx.quadraticCurveTo(S, 0, S, radius);
+    ctx.lineTo(S, S - radius);
+    ctx.quadraticCurveTo(S, S, S - radius, S);
+    ctx.lineTo(radius, S);
+    ctx.quadraticCurveTo(0, S, 0, S - radius);
+    ctx.lineTo(0, radius);
+    ctx.quadraticCurveTo(0, 0, radius, 0);
+    ctx.closePath();
+
+    const bgGrad = ctx.createLinearGradient(0, 0, S, S);
+    bgGrad.addColorStop(0, '#09092d');
+    bgGrad.addColorStop(1, '#1a1a6e');
+    ctx.fillStyle = bgGrad;
+    ctx.fill();
+  } else {
+    const bgGrad = ctx.createLinearGradient(0, 0, S, S);
+    bgGrad.addColorStop(0, '#09092d');
+    bgGrad.addColorStop(1, '#1a1a6e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, S, S);
+  }
+
+  // === GLOW CIRCLE ===
+  const glowGrad = ctx.createRadialGradient(S*.5, S*.47, 0, S*.5, S*.47, S*.28);
+  glowGrad.addColorStop(0, 'rgba(75,75,249,0.15)');
+  glowGrad.addColorStop(1, 'rgba(75,75,249,0)');
+  ctx.fillStyle = glowGrad;
+  ctx.beginPath();
+  ctx.arc(S*.5, S*.47, S*.28, 0, Math.PI*2);
+  ctx.fill();
+
+  // === BARBELL ===
+  const barY = S * 0.435;
+  const barH = S * 0.047;
+  const barX = S * 0.30;
+  const barW = S * 0.40;
+
+  // Gradient for bar
+  const barGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+  barGrad.addColorStop(0, FD.indigo);
+  barGrad.addColorStop(1, FD.mint);
+
+  // Left plate
+  const plateW = S * 0.10, plateH = S * 0.20;
+  const lPlateX = S * 0.125, plateY = S * 0.39;
+  const accGrad = ctx.createLinearGradient(lPlateX, plateY, lPlateX + plateW, plateY + plateH);
+  accGrad.addColorStop(0, FD.indigo);
+  accGrad.addColorStop(1, FD.lavender);
+
+  drawRoundRect(ctx, lPlateX, plateY, plateW, plateH, S*0.027, accGrad);
+
+  // Left plate detail
+  ctx.fillStyle = 'rgba(9,9,45,0.35)';
+  drawRoundRect(ctx, lPlateX + S*.016, plateY + S*.023, plateW - S*.031, plateH - S*.047, S*0.019);
+
+  // Left plate hole
+  ctx.beginPath();
+  ctx.arc(lPlateX + plateW*.5, plateY + plateH*.5, S*.019, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(9,9,45,0.6)';
+  ctx.fill();
+
+  // Left collar
+  drawRoundRect(ctx, S*0.225, plateY + S*.039, S*0.047, plateH - S*.078, S*0.015, '#6b6bff');
+
+  // Bar body
+  drawRoundRect(ctx, barX, barY, barW, barH, barH*.5, barGrad);
+
+  // Bar highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  drawRoundRect(ctx, barX, barY, barW, barH*.38, barH*.19);
+
+  // Right collar
+  drawRoundRect(ctx, S*0.728, plateY + S*.039, S*0.047, plateH - S*.078, S*0.015, '#6b6bff');
+
+  // Right plate
+  const rPlateX = S * 0.773;
+  drawRoundRect(ctx, rPlateX, plateY, plateW, plateH, S*0.027, accGrad);
+  ctx.fillStyle = 'rgba(9,9,45,0.35)';
+  drawRoundRect(ctx, rPlateX + S*.016, plateY + S*.023, plateW - S*.031, plateH - S*.047, S*0.019);
+  ctx.beginPath();
+  ctx.arc(rPlateX + plateW*.5, plateY + plateH*.5, S*.019, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(9,9,45,0.6)';
+  ctx.fill();
+
+  // === PROGRESS ARC ===
+  const arcCX = S*.5, arcCY = S*.48, arcR = S*.31;
+  const arcStart = Math.PI * 0.15, arcEnd = Math.PI * 0.85;
+
+  // Track
+  ctx.beginPath();
+  ctx.arc(arcCX, arcCY, arcR, Math.PI + arcStart, Math.PI * 2 - arcStart + Math.PI);
+  ctx.strokeStyle = 'rgba(75,75,249,0.18)';
+  ctx.lineWidth = S * 0.019;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Progress (75%)
+  const progGrad = ctx.createLinearGradient(arcCX - arcR, 0, arcCX + arcR, 0);
+  progGrad.addColorStop(0, FD.indigo);
+  progGrad.addColorStop(1, FD.mint);
+
+  ctx.beginPath();
+  ctx.arc(arcCX, arcCY, arcR, Math.PI + arcStart, Math.PI + arcStart + (Math.PI - arcStart * 2) * 0.75);
+  ctx.strokeStyle = progGrad;
+  ctx.lineWidth = S * 0.019;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Progress dot
+  const dotAngle = Math.PI + arcStart + (Math.PI - arcStart * 2) * 0.75;
+  const dotX = arcCX + arcR * Math.cos(dotAngle);
+  const dotY = arcCY + arcR * Math.sin(dotAngle);
+  const dotGlow = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, S*.025);
+  dotGlow.addColorStop(0, FD.mint);
+  dotGlow.addColorStop(1, 'rgba(139,240,187,0)');
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, S * .025, 0, Math.PI * 2);
+  ctx.fillStyle = dotGlow;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, S * .014, 0, Math.PI * 2);
+  ctx.fillStyle = FD.mint;
+  ctx.fill();
+
+  // === 4M TEXT ===
+  const textGrad = ctx.createLinearGradient(S*.35, S*.73, S*.65, S*.73);
+  textGrad.addColorStop(0, FD.indigo);
+  textGrad.addColorStop(1, FD.lavender);
+
+  ctx.font = `900 ${S * .135}px -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = textGrad;
+  ctx.fillText('4M', S * .5, S * .83);
+
+  // === SPARKLES ===
+  drawSparkle(ctx, S*.31, S*.29, S*.008, FD.lemon, 0.65);
+  drawSparkle(ctx, S*.69, S*.29, S*.008, FD.lemon, 0.65);
+  drawSparkle(ctx, S*.25, S*.63, S*.006, FD.mint, 0.5);
+  drawSparkle(ctx, S*.75, S*.63, S*.006, FD.mint, 0.5);
+}
+
+function drawRoundRect(ctx, x, y, w, h, r, fill) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+}
+
+function drawSparkle(ctx, x, y, r, color, opacity) {
+  ctx.globalAlpha = opacity;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/* ================================================================
+   SCREENSHOT GENERATOR
+   ================================================================ */
+
+function drawScreenshot(ctx, W, H) {
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#09092d');
+  bg.addColorStop(1, '#0f0f3a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Status bar
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(0, 0, W, 44);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '500 13px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('09:41', 20, 28);
+  ctx.textAlign = 'right';
+  ctx.fillText('●●● WiFi 🔋', W - 20, 28);
+
+  // Header
+  ctx.fillStyle = 'rgba(15,15,58,0.95)';
+  ctx.fillRect(0, 44, W, 64);
+  // Logo
+  const logoGrad = ctx.createLinearGradient(20, 56, 56, 96);
+  logoGrad.addColorStop(0, '#4b4bf9');
+  logoGrad.addColorStop(1, '#bfa1ff');
+  drawRoundRect(ctx, 20, 56, 40, 40, 10, logoGrad);
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 20px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('💪', 40, 82);
+  // Title
+  ctx.fillStyle = '#fff';
+  ctx.font = '800 18px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('Training 4M', 72, 72);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '500 11px system-ui';
+  ctx.fillText('Semaine 3 · Phase Reprise', 72, 90);
+
+  // Hero card
+  const heroGrad = ctx.createLinearGradient(16, 120, W - 16, 280);
+  heroGrad.addColorStop(0, '#4b4bf9');
+  heroGrad.addColorStop(1, '#2323b8');
+  drawRoundRect(ctx, 16, 120, W - 32, 180, 20, heroGrad);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.font = '600 13px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('Bonjour 👋', 32, 148);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '900 28px system-ui';
+  ctx.fillText('Othmane 💪', 32, 178);
+
+  // Next session card inside hero
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  drawRoundRect(ctx, 28, 188, W - 56, 60, 12);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '600 11px system-ui';
+  ctx.fillText('PROCHAINE SÉANCE', 40, 206);
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 16px system-ui';
+  ctx.fillText('💪 Pectoraux + Triceps', 40, 228);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '500 11px system-ui';
+  ctx.fillText('Semaine 3 · Phase Reprise', 40, 244);
+
+  // Stats row
+  const statColors = ['rgba(75,75,249,0.6)', 'rgba(249,239,119,0.6)', 'rgba(139,240,187,0.6)', 'rgba(255,255,255,0.08)'];
+  const statLabels = [['12', 'Séances'], ['3🔥', 'Streak'], ['S3', 'Semaine'], ['18%', 'Prog.']];
+  const sw = (W - 32 - 30) / 4;
+
+  statLabels.forEach((stat, i) => {
+    const x = 16 + i * (sw + 10);
+    ctx.fillStyle = 'rgba(26,26,94,0.8)';
+    drawRoundRect(ctx, x, 316, sw, 64, 10);
+    ctx.fillStyle = i < 3 ? Object.values(FD)[i + 4] : '#fff';
+    ctx.font = '800 20px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(stat[0], x + sw / 2, 344);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '600 10px system-ui';
+    ctx.fillText(stat[1], x + sw / 2, 362);
+  });
+
+  // Score card
+  ctx.fillStyle = 'rgba(26,26,94,0.9)';
+  drawRoundRect(ctx, 16, 396, W - 32, 120, 16);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '700 11px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('SCORE FORME', 32, 418);
+
+  // Score circle
+  ctx.beginPath();
+  ctx.arc(72, 450, 32, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(75,75,249,0.2)';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(72, 450, 32, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * 0.74);
+  ctx.strokeStyle = '#8bf0bb';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '800 18px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('74', 72, 456);
+
+  // Score label
+  ctx.fillStyle = 'rgba(139,240,187,0.9)';
+  ctx.font = '700 13px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('💪 Bien', 120, 432);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '500 12px system-ui';
+  ctx.fillText('Récupération', 120, 452);
+  ctx.fillText('Assiduité', 120, 470);
+  ctx.fillText('Progression', 120, 488);
+
+  // Bars
+  [[75,'#8bf0bb'],[80,'#4b4bf9'],[18,'#bfa1ff']].forEach(([pct, color], i) => {
+    const bx = 230, by = 447 + i * 18, bw = W - 262;
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    drawRoundRect(ctx, bx, by, bw, 6, 3);
+    ctx.fillStyle = color;
+    drawRoundRect(ctx, bx, by, bw * (pct / 100), 6, 3);
+  });
+
+  // Bottom nav simulation
+  ctx.fillStyle = 'rgba(15,15,58,0.97)';
+  ctx.fillRect(0, H - 72, W, 72);
+  ctx.strokeStyle = 'rgba(75,75,249,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, H - 72);
+  ctx.lineTo(W, H - 72);
+  ctx.stroke();
+
+  const navItems = [['🏠','Accueil',true], ['🏋️','Training',false], ['⚡','Live',false], ['📊','Stats',false], ['👤','Profil',false]];
+  navItems.forEach((item, i) => {
+    const nx = (W / 5) * i + W / 10;
+    ctx.fillStyle = item[2] ? '#4b4bf9' : 'rgba(255,255,255,0.3)';
+    ctx.font = '700 10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(item[0], nx, H - 42);
+    ctx.fillText(item[1], nx, H - 22);
+  });
+
+  // Watermark
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.font = '500 11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Training 4M · snarlingleo.github.io/Programme/', W / 2, H - 8);
+}
+
+function drawOGImage(ctx, W, H) {
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#09092d');
+  bg.addColorStop(0.5, '#0f0f4a');
+  bg.addColorStop(1, '#09092d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines (subtle)
+  ctx.strokeStyle = 'rgba(75,75,249,0.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Left: Icon (300x300)
+  const iconCanvas = document.createElement('canvas');
+  iconCanvas.width = 300; iconCanvas.height = 300;
+  const iconCtx = iconCanvas.getContext('2d');
+  drawIcon(iconCtx, 300, false);
+  ctx.drawImage(iconCanvas, 80, H/2 - 150, 300, 300);
+
+  // Right: Text
+  const tx = 460;
+
+  // Badge
+  ctx.fillStyle = 'rgba(75,75,249,0.2)';
+  drawRoundRect(ctx, tx, H/2 - 130, 180, 30, 15);
+  ctx.fillStyle = '#4b4bf9';
+  ctx.font = '700 13px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('PWA · 4 MOIS · GRATUIT', tx + 90, H/2 - 110);
+
+  // Title
+  const titleGrad = ctx.createLinearGradient(tx, H/2 - 80, tx + 500, H/2);
+  titleGrad.addColorStop(0, '#fff');
+  titleGrad.addColorStop(1, '#bfa1ff');
+  ctx.fillStyle = titleGrad;
+  ctx.font = '900 64px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('Training', tx, H/2 - 40);
+  ctx.fillText('4M', tx, H/2 + 40);
+
+  // Subtitle
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '500 20px system-ui';
+  ctx.fillText('Programme musculation complet', tx, H/2 + 90);
+  ctx.fillText('Suivi · Nutrition · Coach IA', tx, H/2 + 120);
+
+  // Stats chips
+  const chips = [['150+', 'Séances tracées'], ['16', 'Semaines'], ['4', 'Modules']];
+  chips.forEach((chip, i) => {
+    const cx = tx + i * 200;
+    ctx.fillStyle = 'rgba(75,75,249,0.15)';
+    drawRoundRect(ctx, cx, H/2 + 150, 180, 56, 12);
+    const chipGrad = ctx.createLinearGradient(cx, 0, cx + 180, 0);
+    chipGrad.addColorStop(0, '#4b4bf9'); chipGrad.addColorStop(1, '#8bf0bb');
+    ctx.fillStyle = chipGrad;
+    ctx.font = '800 24px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(chip[0], cx + 90, H/2 + 178);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '500 12px system-ui';
+    ctx.fillText(chip[1], cx + 90, H/2 + 196);
+  });
+
+  // URL
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '500 14px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('snarlingleo.github.io/Programme/', tx, H - 30);
+}
+
+/* ================================================================
+   ICON CONFIGS
+   ================================================================ */
+
+const ICONS = [
+  { id:'icon-192', label:'icon-192.png', size:192, maskable:false },
+  { id:'icon-512', label:'icon-512.png', size:512, maskable:false },
+  { id:'icon-192-maskable', label:'icon-192-maskable.png', size:192, maskable:true },
+  { id:'icon-512-maskable', label:'icon-512-maskable.png', size:512, maskable:true },
+  { id:'apple-touch', label:'apple-touch-icon.png', size:180, maskable:false },
+  { id:'favicon', label:'favicon-32.png', size:32, maskable:false },
+];
+
+const SCREENSHOTS = [
+  { id:'screenshot-home', label:'screenshot-home.png', w:390, h:844, type:'screenshot' },
+  { id:'og-image', label:'og-image.png', w:1200, h:630, type:'og' },
+];
+
+/* ================================================================
+   RENDER ALL
+   ================================================================ */
+
+function renderPreviews() {
+  const iconGrid = document.getElementById('icon-grid');
+  const ssGrid = document.getElementById('screenshot-grid');
+
+  ICONS.forEach(cfg => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<h3>${cfg.label}</h3>`;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = cfg.size; canvas.height = cfg.size;
+    canvas.style.width = Math.min(cfg.size, 128) + 'px';
+    canvas.style.height = Math.min(cfg.size, 128) + 'px';
+    canvas.id = cfg.id;
+
+    const ctx = canvas.getContext('2d');
+    drawIcon(ctx, cfg.size, cfg.maskable);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = `⬇️ Télécharger ${cfg.label}`;
+    btn.onclick = () => downloadCanvas(canvas, cfg.label);
+
+    card.appendChild(canvas);
+    card.appendChild(btn);
+    iconGrid.appendChild(card);
+  });
+
+  SCREENSHOTS.forEach(cfg => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<h3>${cfg.label} (${cfg.w}×${cfg.h})</h3>`;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = cfg.w; canvas.height = cfg.h;
+    canvas.style.width = Math.min(cfg.w / 2, 195) + 'px';
+    canvas.style.height = Math.min(cfg.h / 2, 422) + 'px';
+    canvas.id = cfg.id;
+
+    const ctx = canvas.getContext('2d');
+    if (cfg.type === 'screenshot') drawScreenshot(ctx, cfg.w, cfg.h);
+    else if (cfg.type === 'og') drawOGImage(ctx, cfg.w, cfg.h);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = `⬇️ Télécharger ${cfg.label}`;
+    btn.onclick = () => downloadCanvas(canvas, cfg.label);
+
+    card.appendChild(canvas);
+    card.appendChild(btn);
+    ssGrid.appendChild(card);
+  });
+}
+
+function downloadCanvas(canvas, filename) {
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = canvas.toDataURL('image/png', 1.0);
+  a.click();
+}
+
+async function generateAll() {
+  const btn = document.querySelector('.btn-all');
+  btn.textContent = '⏳ Génération en cours...';
+  btn.disabled = true;
+
+  // Small delay between each download to avoid browser blocking
+  const allConfigs = [...ICONS, ...SCREENSHOTS];
+  for (const cfg of allConfigs) {
+    const canvas = document.getElementById(cfg.id);
+    if (canvas) {
+      downloadCanvas(canvas, cfg.label);
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+
+  btn.textContent = '✅ Tout téléchargé !';
+  btn.disabled = false;
+  document.getElementById('status').classList.add('show');
+
+  setTimeout(() => {
+    btn.textContent = '⚡ Générer et télécharger TOUT';
+  }, 3000);
+}
+
+// Init
+window.addEventListener('load', renderPreviews);
+</script>
+</body>
+</html>
