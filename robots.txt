@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://snarlingleo.github.io/Programme/sitemap.xml
+
+# Disallow admin/tools
+Disallow: /tools/
+Disallow: /generate-icons.html

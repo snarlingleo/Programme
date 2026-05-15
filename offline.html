@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#09092d"/>
+<title>Training 4M — Hors ligne</title>
+<style>
+:root{
+  --fd-indigo:#4b4bf9;
+  --fd-midnight:#09092d;
+  --fd-mint:#8bf0bb;
+  --fd-lemon:#f9ef77;
+  --fd-coral:#ff8d96;
+  --fd-lavender:#bfa1ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--fd-midnight);
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  text-align:center;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* Background animated rings */
+.bg-ring{
+  position:fixed;
+  border-radius:50%;
+  border:1px solid rgba(75,75,249,0.15);
+  animation:expand 4s ease-out infinite;
+}
+.bg-ring:nth-child(1){width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:0s}
+.bg-ring:nth-child(2){width:350px;height:350px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:.8s}
+.bg-ring:nth-child(3){width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1.6s}
+
+@keyframes expand{
+  0%{opacity:.6;transform:translate(-50%,-50%) scale(.95)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}
+}
+
+.content{position:relative;z-index:1;max-width:360px;width:100%}
+
+.icon-wrap{
+  width:100px;height:100px;
+  background:linear-gradient(135deg,rgba(75,75,249,.2),rgba(191,161,255,.1));
+  border:2px solid rgba(75,75,249,.3);
+  border-radius:32px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;
+  margin:0 auto 28px;
+  animation:float 3s ease-in-out infinite;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+
+h1{
+  font-size:28px;font-weight:800;
+  background:linear-gradient(135deg,#fff,var(--fd-lavender));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:8px;
+}
+.subtitle{
+  font-size:15px;color:rgba(255,255,255,.6);
+  line-height:1.6;margin-bottom:32px;
+}
+
+/* Status card */
+.status-card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(75,75,249,.25);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:24px;
+}
+.status-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  text-align:left;
+  font-size:14px;
+}
+.status-row:last-child{border-bottom:none}
+.status-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.dot-green{background:var(--fd-mint);box-shadow:0 0 8px rgba(139,240,187,.5)}
+.dot-yellow{background:var(--fd-lemon);box-shadow:0 0 8px rgba(249,239,119,.5)}
+.dot-red{background:var(--fd-coral);box-shadow:0 0 8px rgba(255,141,150,.5)}
+.status-label{flex:1;color:rgba(255,255,255,.8)}
+.status-val{font-size:12px;color:rgba(255,255,255,.4)}
+
+/* Buttons */
+.btn-retry{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,var(--fd-indigo),#6b6bff);
+  color:#fff;border:none;
+  border-radius:12px;font-size:16px;font-weight:600;
+  cursor:pointer;margin-bottom:12px;
+  transition:all .25s ease;
+  box-shadow:0 4px 20px rgba(75,75,249,.4);
+}
+.btn-retry:active{transform:scale(.96)}
+
+.btn-open{
+  width:100%;padding:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.7);
+  border-radius:12px;font-size:15px;font-weight:500;
+  cursor:pointer;transition:all .25s ease;
+}
+.btn-open:active{transform:scale(.96);background:rgba(255,255,255,.1)}
+
+/* Connection status badge */
+.conn-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  margin-bottom:20px;
+}
+.conn-badge.offline{background:rgba(255,141,150,.15);color:var(--fd-coral);border:1px solid rgba(255,141,150,.3)}
+.conn-badge.online{background:rgba(139,240,187,.15);color:var(--fd-mint);border:1px solid rgba(139,240,187,.3)}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Tip */
+.tip{
+  font-size:12px;color:rgba(255,255,255,.35);
+  margin-top:20px;line-height:1.5;
+}
+
+/* Powered by */
+.powered{
+  position:fixed;bottom:20px;
+  font-size:11px;color:rgba(255,255,255,.2);
+  letter-spacing:.5px;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-ring"></div>
+<div class="bg-ring"></div>
+<div class="bg-ring"></div>
+
+<div class="content">
+
+  <div class="icon-wrap">📵</div>
+
+  <div class="conn-badge offline" id="conn-badge">
+    <div class="conn-dot"></div>
+    <span id="conn-text">Hors ligne</span>
+  </div>
+
+  <h1>Mode Hors-ligne</h1>
+  <p class="subtitle">
+    Pas de connexion détectée.<br>
+    Tes données restent disponibles en local.
+  </p>
+
+  <div class="status-card">
+    <div class="status-row">
+      <div class="status-dot dot-green"></div>
+      <span class="status-label">Données locales</span>
+      <span class="status-val">Disponibles ✓</span>
+    </div>
+    <div class="status-row">
+      <div class="status-dot dot-green"></div>
+      <span class="status-label">Timer & Compteur</span>
+      <span class="status-val">Disponibles ✓</span>
+    </div>
+    <div class="status-row">
+      <div class="status-dot dot-yellow"></div>
+      <span class="status-label">Synchronisation</span>
+      <span class="status-val" id="sync-status">En attente</span>
+    </div>
+    <div class="status-row">
+      <div class="status-dot dot-red"></div>
+      <span class="status-label">Coach IA avancé</span>
+      <span class="status-val">Non disponible</span>
+    </div>
+  </div>
+
+  <button class="btn-retry" onclick="retry()">
+    🔄 Réessayer la connexion
+  </button>
+  <button class="btn-open" onclick="openApp()">
+    📱 Ouvrir l'app en mode hors-ligne
+  </button>
+
+  <p class="tip">
+    💡 Training 4M fonctionne hors-ligne grâce au mode PWA.<br>
+    Tes séances seront synchronisées dès le retour de la connexion.
+  </p>
+
+</div>
+
+<div class="powered">Powered by EverGPT</div>
+
+<script>
+// Auto-retry on connection restore
+window.addEventListener('online', () => {
+  document.getElementById('conn-badge').className = 'conn-badge online';
+  document.getElementById('conn-text').textContent = 'Connexion restaurée !';
+  document.getElementById('sync-status').textContent = 'Synchronisation...';
+  setTimeout(() => { window.location.href = './'; }, 1500);
+});
+
+function retry() {
+  const btn = document.querySelector('.btn-retry');
+  btn.textContent = '⏳ Vérification...';
+  btn.disabled = true;
+  setTimeout(() => {
+    if (navigator.onLine) {
+      window.location.href = './';
+    } else {
+      btn.textContent = '🔄 Réessayer la connexion';
+      btn.disabled = false;
+      document.querySelector('.subtitle').textContent = 'Toujours hors ligne. Vérifie ta connexion.';
+    }
+  }, 1200);
+}
+
+function openApp() {
+  window.location.href = './index.html';
+}
+</script>
+</body>
+</html>

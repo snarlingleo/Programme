@@ -1,0 +1,88 @@
+{
+  "name": "Training 4M — Programme Musculation",
+  "short_name": "Training 4M",
+  "description": "Programme musculation 4 mois — Discipline, progression et suivi personnalisé",
+  "start_url": "/Programme/",
+  "scope": "/Programme/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#09092d",
+  "theme_color": "#4b4bf9",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["health", "fitness", "sports"],
+  "id": "training4m-pwa",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "⚡ Séance Live",
+      "short_name": "Live",
+      "description": "Démarre une séance maintenant",
+      "url": "/Programme/#live",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "⏱️ Timer Repos",
+      "short_name": "Timer",
+      "description": "Timer de repos inter-séries",
+      "url": "/Programme/#timer",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "📅 Planning",
+      "short_name": "Planning",
+      "description": "Voir le planning de la semaine",
+      "url": "/Programme/#planning",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "📊 Mes Stats",
+      "short_name": "Stats",
+      "description": "Voir mes statistiques",
+      "url": "/Programme/#stats",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-home.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard Training 4M"
+    }
+  ],
+  "prefer_related_applications": false,
+  "handle_links": "preferred",
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

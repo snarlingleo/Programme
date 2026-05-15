@@ -1,0 +1,6 @@
+# SPA fallback
+/*    /index.html   200
+
+# Redirect old URLs
+/Programme    /    301
+/programme    /    301

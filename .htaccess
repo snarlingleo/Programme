@@ -1,0 +1,58 @@
+# Training 4M — Apache Configuration
+
+# Enable compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json application/manifest+json
+</IfModule>
+
+# Browser caching
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType application/manifest+json "access plus 1 day"
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Service Worker scope
+  <FilesMatch "sw\.js$">
+    Header set Service-Worker-Allowed "/"
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+
+  # Manifest
+  <FilesMatch "manifest\.json$">
+    Header set Content-Type "application/manifest+json"
+  </FilesMatch>
+</IfModule>
+
+# HTTPS redirect
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# SPA fallback
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /Programme/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /Programme/index.html [L]
+</IfModule>
+
+# MIME types
+AddType application/manifest+json .webmanifest
+AddType application/manifest+json .json
+AddType image/svg+xml .svg
+AddType font/woff2 .woff2
